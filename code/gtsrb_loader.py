@@ -142,7 +142,7 @@ def test(couleur, nb_val=12630):
         save_test(images, labels, couleur)
     images, labels = torch.load('../data/' + couleur + '/test.pt')
     images, labels = images[:nb_val], labels[:nb_val].long()
-    return images, labels
+    return images.to(device), labels.to(device)
 
 
 def val(couleur, val_split, num_element=None):

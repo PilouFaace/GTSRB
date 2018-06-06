@@ -54,7 +54,7 @@ optimizer = model.optimizer
 # Loads the training database, and splits it in into `train` and `val`.
 train_images, train_labels = gtsrb_loader.train(dset_name, val_split, num_img)
 val_images, val_labels = gtsrb_loader.val(dset_name, val_split, num_img)
-test_images, test_labels = gtsrb_loader.test(dset_name)
+test_images, test_labels = gtsrb_loader.test(args.color)
 num_train = len(train_images)
 num_val = len(val_images)
 print(num_val)
