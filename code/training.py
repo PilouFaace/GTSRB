@@ -73,7 +73,7 @@ def accuracy(images, labels):
     count = 0
     train_loader2 = DataLoader(TensorDataset(images, labels), batch_size=1000)
     for (x, y) in tqdm(train_loader2):
-        y_pred = model.eval(x)
+        y_pred = model.eval()(x)
         count += (y_pred.max(1)[1] == y).double().sum()
     return 100 * count / len(images)
 
