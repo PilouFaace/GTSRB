@@ -22,7 +22,7 @@ import copy
 
 
 # Téléchargement et décompression des images
-
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def get_train_folder():
     train_url = 'http://benchmark.ini.rub.de/Dataset/GTSRB_Final_Training_Images.zip'
@@ -124,8 +124,8 @@ def train(couleur, val_split, num_element=None):  # Couleur : 'rgb', 'grey', 'cl
     images, labels = torch.load('../data/' + couleur + '/train.pt')
     nb_train = round((1 - val_split) * len(images))
     images, labels = images[:nb_train], labels[:nb_train].long()
-    return images, labels
-print
+    return images.to(device), labels.to(device)
+
 
 def test(couleur, nb_val=12630):
     if not os.path.exists('../data/' + couleur + '/test.pt'):
@@ -200,9 +200,9 @@ def create():
     chemins_images = []
     for i in range(43):
         if i < 10:
-            cont = glob.glob(os.path.join('data/Final_Training/Images/0000{}/*.ppm'.format(i)))
+            cont = glob.glob(os.path.join('../data/Final_Training/Images/0000{}/*.ppm'.format(i)))
         else:
-            cont = glob.glob(os.path.join('data/Final_Training/Images/000{}/*.ppm'.format(i)))
+            cont = glob.glob(os.path.join('../data/Final_Training/Images/000{}/*.ppm'.format(i)))
         random.shuffle(cont)
         for j in range(2000):
             chemins_images.append(cont[j])
@@ -294,6 +294,7 @@ def ajout_distorsion(images, labels):
     for i in range(43):
         images_c = images[labels]
 
+
 # Transforme aléatoirement une image 40X40 par distorsion.
 def distorsion(image):
     src = np.array([[0, 0], [0, 40], [40, 40], [40, 0]])
@@ -347,13 +348,11 @@ def resizee():
             im = transform.resize(im, (40, 40), mode='wrap')
             io.imsave(chemin_images[j], im)
 
+
 def train_dist(couleur):  # Couleur : 'rgb', 'grey', 'clahe'
     if not os.path.exists('../data/' + couleur + '_dist'):
-        os.makedirs('data/' + couleur + '_dist')
+        os.makedirs('../data/' + couleur + '_dist')
     if not os.path.exists('../data/' + couleur + '_dist/train.pt'):
-        resizee()
-        normalisation(2000)
-        A = create()
         images = Parallel(n_jobs=4)(delayed(traite_image)(path, couleur) for path in A)
         labels = Parallel(n_jobs=4)(delayed(traite_label)(path) for path in A)
         mélange(images, labels)
@@ -365,3 +364,9 @@ def train_dist(couleur):  # Couleur : 'rgb', 'grey', 'clahe'
             images = images.view(len(images), 1, 40, 40)
         torch.save((images, labels), 'data/' + couleur + '_dist/train.pt')
         print('done')
+
+def create_dist():
+    resizee()
+    normalisation(2000)
+    A = create()
+    print(len(A))
