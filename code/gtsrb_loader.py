@@ -213,7 +213,7 @@ def create():
 def train_sym(couleur):  # Couleur : 'rgb', 'grey', 'clahe'
     if not os.path.exists('../data/' + couleur + '_sym'):
         print('ajout du chemin')
-        os.makedirs('..data/' + couleur + '_sym')
+        os.makedirs('../data/' + couleur + '_sym')
     if not os.path.exists('../data/' + couleur + '_sym/train.pt'):
         chemins_images = glob.glob(os.path.join('../data/Final_Training/Images/*/*.ppm'))
         images = Parallel(n_jobs=16)(delayed(traite_image)(path, couleur) for path in chemins_images)
