@@ -18,6 +18,7 @@ import torch
 from skimage import io, color, transform, exposure
 from joblib import Parallel, delayed
 import random
+import copy
 
 
 # Téléchargement et décompression des images
