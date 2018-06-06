@@ -90,6 +90,11 @@ def big_loss(images, labels):
     return count / len(images)
 
 
+def save_data(liste, name):
+    with open('../models/model_name' + 'dset_name' + name + 'lr', 'w') as filehandle:
+        for listitem in liste:
+            filehandle.write('%s\n' % listitem)
+
 # NETWORK TRAINING
 # ----------------
 
@@ -152,8 +157,11 @@ if save_model:
     path = os.path.join("../models/" + dset_name + '/' + model_name + ".pt")
     torch.save(model, path)
     # Saves the accs history graph
-    plot.train_history(train_accs, val_accs)
-    plt.savefig(path + model_name + ".png", transparent=True)
+    # plot.train_history(train_accs, val_accs)
+    # plt.savefig(path + model_name + "_" + lr + ".png", transparent=True)
+    save_data(train_accs, 'train_accs')
+    save_data(val_accs, 'cal_accs')
+    save_data(test_accs, 'test_accs')
 
 
 # def discriminator_performance(x, y):
