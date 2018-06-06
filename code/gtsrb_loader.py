@@ -251,12 +251,12 @@ def ajout_sym():
     for i in range(43):
         print(i)
         if i < 10:
-            chemin_images = glob.glob(os.path.join('data/Final_Training/Images/0000{}/*.ppm'.format(i)))
-            chemin_dossier = 'data/Final_Training/Images/0000{}'.format(i)
+            chemin_images = glob.glob(os.path.join('../data/Final_Training/Images/0000{}/*.ppm'.format(i)))
+            chemin_dossier = '../data/Final_Training/Images/0000{}'.format(i)
 
         else:
-            chemin_images = glob.glob(os.path.join('data/Final_Training/Images/000{}/*.ppm'.format(i)))
-            chemin_dossier = 'data/Final_Training/Images/000{}'.format(i)
+            chemin_images = glob.glob(os.path.join('../data/Final_Training/Images/000{}/*.ppm'.format(i)))
+            chemin_dossier = '../data/Final_Training/Images/000{}'.format(i)
         n = len(chemin_images)
         if i in sym_vert:
             for j in range(n):
@@ -284,7 +284,7 @@ def ajout_sym():
                 image_sym = image[:, ::-1]
                 L = [sym_mut_vert[j][0] for j in range(len(sym_mut_vert))]
                 dest = L.index(i)
-                chemin = 'data/Final_Training/Images/000{}'.format(sym_mut_vert[dest][1])
+                chemin = '../data/Final_Training/Images/000{}'.format(sym_mut_vert[dest][1])
                 io.imsave(chemin + '/mut_{}.ppm'.format(j), image_sym)
 
 
@@ -307,11 +307,11 @@ def distorsion(image):
 
 def norm(i,nb):
     if i < 10:
-        chemin_images = glob.glob(os.path.join('data/Final_Training/Images/0000{}/*.ppm'.format(i)))
-        chemin_dossier = 'data/Final_Training/Images/0000{}'.format(i)
+        chemin_images = glob.glob(os.path.join('../data/Final_Training/Images/0000{}/*.ppm'.format(i)))
+        chemin_dossier = '../data/Final_Training/Images/0000{}'.format(i)
     else:
-        chemin_images = glob.glob(os.path.join('data/Final_Training/Images/000{}/*.ppm'.format(i)))
-        chemin_dossier = 'data/Final_Training/Images/000{}'.format(i)
+        chemin_images = glob.glob(os.path.join('../data/Final_Training/Images/000{}/*.ppm'.format(i)))
+        chemin_dossier = '../data/Final_Training/Images/000{}'.format(i)
     n = len(chemin_images)
     if n < nb:
         k = nb // n +1
@@ -332,12 +332,12 @@ def resizee():
     for i in range(43):
         print(i)
         if i < 10:
-            chemin_images = glob.glob(os.path.join('data/Final_Training/Images/0000{}/*.ppm'.format(i)))
-            chemin_dossier = 'data/Final_Training/Images/0000{}'.format(i)
+            chemin_images = glob.glob(os.path.join('../data/Final_Training/Images/0000{}/*.ppm'.format(i)))
+            chemin_dossier = '../data/Final_Training/Images/0000{}'.format(i)
 
         else:
-            chemin_images = glob.glob(os.path.join('data/Final_Training/Images/000{}/*.ppm'.format(i)))
-            chemin_dossier = 'data/Final_Training/Images/000{}'.format(i)
+            chemin_images = glob.glob(os.path.join('../data/Final_Training/Images/000{}/*.ppm'.format(i)))
+            chemin_dossier = '../data/Final_Training/Images/000{}'.format(i)
         n = len(chemin_images)
         print(n)
         for j in range(n):
