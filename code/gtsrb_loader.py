@@ -365,6 +365,7 @@ def train_dist(couleur):  # Couleur : 'rgb', 'grey', 'clahe'
         torch.save((images, labels), 'data/' + couleur + '_dist/train.pt')
         print('done')
 
+
 def create_dist():
     resizee()
     normalisation(2000)
