@@ -151,7 +151,7 @@ def val(couleur, val_split, num_element=None):
         num_element = len(images)
     nb_train = round((1 - val_split) * len(images))
     images, labels = images[nb_train:num_element], labels[nb_train:num_element].long()
-    return images,.to(device) labels.to(device)
+    return images.to(device),  labels.to(device)
 
 
 def mélange(images, labels):
