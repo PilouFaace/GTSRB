@@ -36,7 +36,7 @@ def get_train_folder():
         zip_ref.extractall('../data/')
         zip_ref.close()
         print("Unzip complete.")
-        shutil.move('../data/GTSRB/Final_Training', 'data/')
+        shutil.move('../data/GTSRB/Final_Training', '../data/')
         shutil.rmtree('../data/GTSRB')
         os.remove('../data/train.zip')
 
