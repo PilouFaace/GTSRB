@@ -224,7 +224,7 @@ def train_sym(couleur):  # Couleur : 'rgb', 'grey', 'clahe'
             images = images.permute(0, 3, 1, 2)
         else:
             images = images.view(len(images), 1, 40, 40)
-        torch.save((images, labels), 'data/' + couleur + '_sym/train.pt')
+        torch.save((images, labels), '../data/' + couleur + '_sym/train.pt')
         print('done')
 
 
