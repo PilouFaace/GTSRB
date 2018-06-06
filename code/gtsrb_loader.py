@@ -20,12 +20,6 @@ from joblib import Parallel, delayed
 import random
 
 
-def mélange(images, labels):
-    rng_state = np.random.get_state()
-    np.random.shuffle(images)
-    np.random.set_state(rng_state)
-    np.random.shuffle(labels)
-
 # Téléchargement et décompression des images
 
 
@@ -157,10 +151,209 @@ def val(couleur, val_split, num_element=None):
     return images, labels
 
 
-def train_dist(couleur, chemins_images):  # Couleur : 'rgb', 'grey', 'clahe'
-    if not os.path.exists('../data/' + couleur + '_dist/train.pt'):
+def mélange(images, labels):
+    rng_state = np.random.get_state()
+    np.random.shuffle(images)
+    np.random.set_state(rng_state)
+    np.random.shuffle(labels)
+
+
+# Listes des catégories de paneaux symétrisables.
+auto_miroir_vertical = [11, 12, 13, 15, 17, 18, 22, 26, 30, 35]
+auto_miroir_horizontal = [1, 5, 12, 15, 17]
+auto_miroir_double = [12, 15, 17, 32]
+mutuel_miroir_vert = [[19,20], [33,34], [36,37], [38,39], [20,19], [34,33], [37,36], [39,38]]
+
+
+# Ajoute tous les symétriques à une BDD et mélange les images.
+def symétries(images, labels):
+    labels_num = np.array([np.argmax(i) for i in labels])
+    images_ext = np.empty((0, 40, 40), dtype = images.dtype)
+    labels_ext = np.empty((0, 43), dtype = labels.dtype)
+    for c in range(43):
+        print(c)
+        images_c = images[labels_num == c]
+        images_ext = np.append(images_ext, images_c, axis=0)
+        if c in auto_miroir_horizontal:
+            images_ext = np.append(images_ext, images_c[:, :, ::-1], axis=0)
+        if c in auto_miroir_vertical:
+            images_ext = np.append(images_ext, images_c[:, ::-1, :], axis=0)
+        if c in auto_miroir_double:
+            images_ext = np.append(images_ext, images_c[:, ::-1, ::-1], axis=0)
+        nouv_labels = np.full((len(images_ext) - len(labels_ext), 43), np.eye(43)[c])
+        labels_ext = np.append(labels_ext, nouv_labels, axis=0)
+        if [c, c+1] in mutuel_miroir_vert:
+            images_ext = np.append(images_ext, images_c[:, ::-1, :], axis=0)
+            nouv_labels = np.full((len(images_ext) - len(labels_ext), 43), np.eye(43)[c+1])
+            labels_ext = np.append(labels_ext, nouv_labels, axis=0)
+        if [c, c-1] in mutuel_miroir_vert:
+            images_ext = np.append(images_ext, images_c[:, ::-1, :], axis=0)
+            nouv_labels = np.full((len(images_ext) - len(labels_ext), 43), np.eye(43)[c-1])
+            labels_ext = np.append(labels_ext, nouv_labels, axis=0)
+    mélange(images_ext, labels_ext)
+    return images_ext, labels_ext
+
+
+def create():
+    chemins_images = []
+    for i in range(43):
+        if i < 10:
+            cont = glob.glob(os.path.join('data/Final_Training/Images/0000{}/*.ppm'.format(i)))
+        else:
+            cont = glob.glob(os.path.join('data/Final_Training/Images/000{}/*.ppm'.format(i)))
+        random.shuffle(cont)
+        for j in range(2000):
+            chemins_images.append(cont[j])
+    print(len(chemins_images))
+    return chemins_images
+
+
+def train_sym(couleur):  # Couleur : 'rgb', 'grey', 'clahe'
+    if not os.path.exists('../data/' + couleur + '_sym'):
+        os.makedirs('data/' + couleur + '_sym')
+    if not os.path.exists('../data/' + couleur + '_sym/train.pt'):
+        chemins_images = glob.glob(os.path.join('../data/Final_Training/Images/', '*/*.ppm'))
         images = Parallel(n_jobs=4)(delayed(traite_image)(path, couleur) for path in chemins_images)
         labels = Parallel(n_jobs=4)(delayed(traite_label)(path) for path in chemins_images)
+        mélange(images, labels)
+        symétries(images, labels)
+        images = torch.Tensor(images)
+        labels = torch.Tensor(labels)
+        if couleur == 'rgb':
+            images = images.permute(0, 3, 1, 2)
+        else:
+            images = images.view(len(images), 1, 40, 40)
+        torch.save((images, labels), 'data/' + couleur + '_sym/train.pt')
+        print('done')
+
+
+
+
+
+
+sym_vert = [11, 12, 13, 15, 17, 18, 22, 26, 30, 35]
+sym_hori = [1, 5, 12, 15, 17]
+sym_diag_droit = [15, 32, 39]
+sym_diag_gauch = [15, 32, 38]
+sym_mut_vert = [[19, 20], [20, 19], [33, 34], [34, 33], [36, 37], [37, 36], [38, 39], [39, 38]]
+
+
+def transpose(tab):
+    tab = transform.resize(tab, (40, 40), mode='wrap')
+    for i in range(40):
+        for j in range(40):
+            if j < i:
+                tab[j][i], tab[i][j] = copy.copy(tab[i][j]), copy.copy(tab[j][i])
+    return tab
+
+
+def ajout_sym():
+    for i in range(43):
+        print(i)
+        if i < 10:
+            chemin_images = glob.glob(os.path.join('data/Final_Training/Images/0000{}/*.ppm'.format(i)))
+            chemin_dossier = 'data/Final_Training_sym/Images/0000{}'.format(i)
+
+        else:
+            chemin_images = glob.glob(os.path.join('data/Final_Training/Images/000{}/*.ppm'.format(i)))
+            chemin_dossier = 'data/Final_Training_sym/Images/000{}'.format(i)
+        n = len(chemin_images)
+        if i in sym_vert:
+            for j in range(n):
+                image = io.imread(chemin_images[j])
+                image_sym = image[:, ::-1]
+                io.imsave(chemin_dossier + '/vert_{}.ppm'.format(j), image_sym)
+        if i in sym_hori:
+            for j in range(n):
+                image = io.imread(chemin_images[j])
+                image_sym = image[::-1, :]
+                io.imsave(chemin_dossier + '/hori_{}.ppm'.format(j), image_sym)
+        if i in sym_diag_droit:
+            for j in range(n):
+                image = io.imread(chemin_images[j])
+                image_sym = transpose(image[:, ::-1])[:, ::-1]
+                io.imsave(chemin_dossier + '/diagd_{}.ppm'.format(j), image_sym)
+        if i in sym_diag_gauch:
+            for j in range(n):
+                image = io.imread(chemin_images[j])
+                image_sym = transpose(image)
+                io.imsave(chemin_dossier + '/diagg_{}.ppm'.format(j), image_sym)
+        if i in [sym_mut_vert[j][0] for j in range(len(sym_mut_vert))]:
+            for j in range(n):
+                image = io.imread(chemin_images[j])
+                image_sym = image[:, ::-1]
+                L = [sym_mut_vert[j][0] for j in range(len(sym_mut_vert))]
+                dest = L.index(i)
+                chemin = 'data/Final_Training/Images/000{}'.format(sym_mut_vert[dest][1])
+                io.imsave(chemin + '/mut_{}.ppm'.format(j), image_sym)
+
+
+def ajout_distorsion(images, labels):
+    for i in range(43):
+        images_c = images[labels]
+
+# Transforme aléatoirement une image 40X40 par distorsion.
+def distorsion(image):
+    src = np.array([[0, 0], [0, 40], [40, 40], [40, 0]])
+    dst = np.array([[random.randrange(-3, 3), random.randrange(-3, 3)],
+                    [random.randrange(-3, 3), 40 - random.randrange(-3, 3)],
+                    [40 - random.randrange(-3, 3),40 - random.randrange(-3, 3)],
+                    [40 - random.randrange(-3, 3), random.randrange(-3, 3)]])
+    disto = transform.ProjectiveTransform()
+    disto.estimate(src, dst)
+    image_dist = transform.warp(image, disto, output_shape=(40, 40), mode='edge')
+    return image_dist
+
+
+def norm(i,nb):
+    if i < 10:
+        chemin_images = glob.glob(os.path.join('data/Final_Training/Images/0000{}/*.ppm'.format(i)))
+        chemin_dossier = 'data/Final_Training/Images/0000{}'.format(i)
+    else:
+        chemin_images = glob.glob(os.path.join('data/Final_Training/Images/000{}/*.ppm'.format(i)))
+        chemin_dossier = 'data/Final_Training/Images/000{}'.format(i)
+    n = len(chemin_images)
+    if n < nb:
+        k = nb // n +1
+        for j in range(n):
+            image = io.imread(chemin_images[j])
+            for m in range(k):
+                im = distorsion(image)
+                io.imsave(chemin_dossier + '/{}_{}.ppm'.format(j, m), im)
+
+
+def normalisation(nb):
+    for i in range(43):
+        print(i)
+        norm(i, nb)
+
+
+def resizee():
+    for i in range(43):
+        print(i)
+        if i < 10:
+            chemin_images = glob.glob(os.path.join('data/Final_Training/Images/0000{}/*.ppm'.format(i)))
+            chemin_dossier = 'data/Final_Training/Images/0000{}'.format(i)
+
+        else:
+            chemin_images = glob.glob(os.path.join('data/Final_Training/Images/000{}/*.ppm'.format(i)))
+            chemin_dossier = 'data/Final_Training/Images/000{}'.format(i)
+        n = len(chemin_images)
+        print(n)
+        for j in range(n):
+            im = io.imread(chemin_images[j])
+            im = transform.resize(im, (40, 40), mode='wrap')
+            io.imsave(chemin_images[j], im)
+
+def train_dist(couleur):  # Couleur : 'rgb', 'grey', 'clahe'
+    if not os.path.exists('../data/' + couleur + '_dist'):
+        os.makedirs('data/' + couleur + '_dist')
+    if not os.path.exists('../data/' + couleur + '_dist/train.pt'):
+        resizee()
+        normalisation(2000)
+        A = create()
+        images = Parallel(n_jobs=4)(delayed(traite_image)(path, couleur) for path in A)
+        labels = Parallel(n_jobs=4)(delayed(traite_label)(path) for path in A)
         mélange(images, labels)
         images = torch.Tensor(images)
         labels = torch.Tensor(labels)
@@ -168,20 +361,5 @@ def train_dist(couleur, chemins_images):  # Couleur : 'rgb', 'grey', 'clahe'
             images = images.permute(0, 3, 1, 2)
         else:
             images = images.view(len(images), 1, 40, 40)
-        save_train(images, labels, couleur)
+        torch.save((images, labels), 'data/' + couleur + '_dist/train.pt')
         print('done')
-
-
-def create():
-    chemins_images = []
-    for i in range(43):
-        if i < 10:
-            cont = glob.glob(os.path.join('data/Final_Training_dist/Images/0000{}/*.ppm'.format(i)))
-        else:
-            cont = glob.glob(os.path.join('data/Final_Training_dist/Images/000{}/*.ppm'.format(i)))
-        random.shuffle(cont)
-        for j in range(2000):
-            chemins_images.append(cont[j])
-    print(len(chemins_images))
-    return chemins_images
-
