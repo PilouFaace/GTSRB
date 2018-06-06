@@ -91,7 +91,7 @@ def big_loss(images, labels):
 
 
 def save_data(liste, name):
-    with open('../models/' + dset_name + '/' + model_name + lr, 'w') as filehandle:
+    with open('../models/' + dset_name + '/' + model_name + str(lr), 'w') as filehandle:
         for listitem in liste:
             filehandle.write('%s\n' % listitem)
 
