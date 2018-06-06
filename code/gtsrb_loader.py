@@ -217,7 +217,6 @@ def train_sym(couleur):  # Couleur : 'rgb', 'grey', 'clahe'
         images = Parallel(n_jobs=16)(delayed(traite_image)(path, couleur) for path in chemins_images)
         labels = Parallel(n_jobs=16)(delayed(traite_label)(path) for path in chemins_images)
         mélange(images, labels)
-        symétries(images, labels)
         images = torch.Tensor(images)
         labels = torch.Tensor(labels)
         if couleur == 'rgb':
@@ -253,11 +252,11 @@ def ajout_sym():
         print(i)
         if i < 10:
             chemin_images = glob.glob(os.path.join('data/Final_Training/Images/0000{}/*.ppm'.format(i)))
-            chemin_dossier = 'data/Final_Training_sym/Images/0000{}'.format(i)
+            chemin_dossier = 'data/Final_Training/Images/0000{}'.format(i)
 
         else:
             chemin_images = glob.glob(os.path.join('data/Final_Training/Images/000{}/*.ppm'.format(i)))
-            chemin_dossier = 'data/Final_Training_sym/Images/000{}'.format(i)
+            chemin_dossier = 'data/Final_Training/Images/000{}'.format(i)
         n = len(chemin_images)
         if i in sym_vert:
             for j in range(n):
