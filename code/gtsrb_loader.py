@@ -129,8 +129,8 @@ print
 def test(couleur, nb_val=12630):
     if not os.path.exists('../data/' + couleur + '/test.pt'):
         chemins_images = glob.glob(os.path.join('../data/Final_Test/Images/', '*/*.ppm'))
-        images = Parallel(n_jobs=4)(delayed(traite_image)(path, couleur) for path in chemins_images)
-        labels = Parallel(n_jobs=4)(delayed(traite_label)(path) for path in chemins_images)
+        images = Parallel(n_jobs=16)(delayed(traite_image)(path, couleur) for path in chemins_images)
+        labels = Parallel(n_jobs=16)(delayed(traite_label)(path) for path in chemins_images)
         images = torch.Tensor(images)
         labels = torch.Tensor(labels).long() 
         if couleur == 'rgb':
