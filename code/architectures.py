@@ -6,7 +6,7 @@ class AlexNet(nn.Module):
     def __init__(self):
         super(AlexNet, self).__init__()
         # Training hyperparameters
-        self.lr = 5e-4
+        self.lr = 1e-4
         self.epochs = 100
         self.batch_size = 64
         self.features = nn.Sequential(

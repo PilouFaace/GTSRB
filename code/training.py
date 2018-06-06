@@ -8,6 +8,9 @@ import architectures
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import plot
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 #Parameters parsing
 parser = argparse.ArgumentParser()
 parser.add_argument("model", type=str)
@@ -35,6 +38,7 @@ save_model = args.save
 
 # Model instanciation
 model = getattr(architectures, model_name)()
+model = model.to(device)
 
 # Loads model hyperparameters (if not specified in args)
 batch_size = args.bs if args.bs else model.batch_size
@@ -69,7 +73,7 @@ def accuracy(images, labels):
     count = 0
     train_loader2 = DataLoader(TensorDataset(images, labels), batch_size=1000)
     for (x, y) in tqdm(train_loader2):
-        y_pred = model.forward(x)
+        y_pred = model.eval(x)
         count += (y_pred.max(1)[1] == y).double().sum()
     return 100 * count / len(images)
 

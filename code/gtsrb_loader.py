@@ -24,6 +24,7 @@ import copy
 # Téléchargement et décompression des images
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+
 def get_train_folder():
     train_url = 'http://benchmark.ini.rub.de/Dataset/GTSRB_Final_Training_Images.zip'
     if not os.path.exists('../data'):
@@ -354,7 +355,7 @@ def train_dist(couleur, chemin_images):  # Couleur : 'rgb', 'grey', 'clahe'
         os.makedirs('../data/' + couleur + '_dist')
     if not os.path.exists('../data/' + couleur + '_dist/train.pt'):
         images = Parallel(n_jobs=16)(delayed(traite_image)(path, couleur) for path in chemin_images)
-        labels = Parallel(n_jobs=16)(delayed(traite_label)(path) for path in chemin_images)
+        labels = Parallel(n_jobs=1)(delayed(traite_label)(path) for path in chemin_images)
         mélange(images, labels)
         images = torch.Tensor(images)
         labels = torch.Tensor(labels)
