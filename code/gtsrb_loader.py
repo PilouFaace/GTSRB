@@ -349,12 +349,12 @@ def resizee():
             io.imsave(chemin_images[j], im)
 
 
-def train_dist(couleur):  # Couleur : 'rgb', 'grey', 'clahe'
+def train_dist(couleur, chemin_images):  # Couleur : 'rgb', 'grey', 'clahe'
     if not os.path.exists('../data/' + couleur + '_dist'):
         os.makedirs('../data/' + couleur + '_dist')
     if not os.path.exists('../data/' + couleur + '_dist/train.pt'):
-        images = Parallel(n_jobs=4)(delayed(traite_image)(path, couleur) for path in A)
-        labels = Parallel(n_jobs=4)(delayed(traite_label)(path) for path in A)
+        images = Parallel(n_jobs=16)(delayed(traite_image)(path, couleur) for path in chemin_images)
+        labels = Parallel(n_jobs=16)(delayed(traite_label)(path) for path in chemin_images)
         mélange(images, labels)
         images = torch.Tensor(images)
         labels = torch.Tensor(labels)
@@ -362,7 +362,7 @@ def train_dist(couleur):  # Couleur : 'rgb', 'grey', 'clahe'
             images = images.permute(0, 3, 1, 2)
         else:
             images = images.view(len(images), 1, 40, 40)
-        torch.save((images, labels), 'data/' + couleur + '_dist/train.pt')
+        torch.save((images, labels), '../data/' + couleur + '_dist/train.pt')
         print('done')
 
 
