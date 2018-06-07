@@ -9,10 +9,10 @@ from matplotlib import rcParams
 from tqdm import tqdm
 
 
-rcParams['text.usetex'] = True
-rcParams['text.latex.unicode'] = True
-rcParams['font.family'] = "serif"
-rcParams['font.serif'] = "cm"
+# rcParams['text.usetex'] = True
+# rcParams['text.latex.unicode'] = True
+# rcParams['font.family'] = "serif"
+# rcParams['font.serif'] = "cm"
 
 
 # # Plots an image (Variable)
@@ -54,7 +54,7 @@ rcParams['font.serif'] = "cm"
 
 # Plots the history of a model training
 def train_history(train_accs, test_accs):
-    rcParams['font.size'] = 12
+    #rcParams['font.size'] = 12
     t = list(range(len(train_accs)))
     plt.plot(t, train_accs, 'r')
     plt.plot(t, test_accs, 'b')
