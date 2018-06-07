@@ -2,7 +2,8 @@
 Plotting functions used in attack.py
 """
 
-
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 from tqdm import tqdm

@@ -71,7 +71,7 @@ num_batches = len(train_loader)
 # (computing the accuracy mini-batch after mini-batch avoids memory overload)
 def accuracy(images, labels):
     count = 0
-    train_loader2 = DataLoader(TensorDataset(images, labels), batch_size=1000)
+    train_loader2 = DataLoader(TensorDataset(images, labels), batch_size=256)
     for (x, y) in tqdm(train_loader2):
         y_pred = model.eval()(x)
         count += (y_pred.max(1)[1] == y).double().sum()
@@ -91,15 +91,12 @@ def big_loss(images, labels):
 
 
 def save_data(liste, name):
-    with open('../models/' + dset_name + '/' + model_name + str(lr), 'w') as filehandle:
+    with open('../models/' + dset_name + '/' + model_name + name + str(lr), 'w') as filehandle:
         for listitem in liste:
             filehandle.write('%s\n' % listitem)
 
 # NETWORK TRAINING
 # ----------------
-
-
-
 # Custom progress bar.
 '''def bar(data, e):
     epoch = f"Epoch {e+1}/{epochs}"
@@ -140,11 +137,12 @@ try:
         val_loss = big_loss(val_images, val_labels)
         val_accs.append(val_acc)
         val_losses.append(val_loss)
-        test_acc = accuracy(test_images, test_labels)
+        test_acc = accuracy(test_images, test_labels).item()
         test_accs.append(test_acc)
         # Prints the losses and accs at the end of each epoch.
         print("Epoch {:3} : train_acc = {:5.2f}% ; val_acc = {:5.2f}%"
               .format(e+1, train_acc, val_acc))
+    print(test_acc)
 
 # Allows to manually interrupt the training (early stopping).
 except KeyboardInterrupt:
@@ -156,12 +154,13 @@ if save_model:
         os.makedirs("../models/" + dset_name)
     path = os.path.join("../models/" + dset_name + '/' + model_name + str(lr) + ".pt")
     torch.save(model, path)
-    # Saves the accs history graph
-    # plot.train_history(train_accs, val_accs)
-    # plt.savefig(path + model_name + "_" + lr + ".png", transparent=True)
-    save_data(train_accs, 'train_accs')
-    save_data(val_accs, 'cal_accs')
-    save_data(test_accs, 'test_accs')
+    #Saves the accs history graph
+    path = os.path.join("../models/" + dset_name + '/')
+    plot.train_history(train_accs, val_accs)
+    plt.savefig(path + model_name + "_" + str(lr) + ".png", transparent=True)
+    # save_data(train_accs, 'train_accs')
+    # save_data(val_accs, 'cal_accs')
+    # save_data(test_accs, 'test_accs')
 
 
 # def discriminator_performance(x, y):
@@ -172,3 +171,4 @@ if save_model:
 #     faux_neg = faux_neg.double().sum()
 #     total = (y_pred.max(1)[1] != y).double().sum()
 #     return (faux_pos, faux_neg, total)
+path = os.path.join("../models/" + dset_name + '/')
