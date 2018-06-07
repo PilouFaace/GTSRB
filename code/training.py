@@ -1,6 +1,7 @@
 import argparse
 import os
-
+import matplotlib
+matplotlib.use('Agg')
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 import gtsrb_loader
