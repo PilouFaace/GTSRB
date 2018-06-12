@@ -153,13 +153,13 @@ except KeyboardInterrupt:
 if save_model:
     if not os.path.exists("../models/" + dset_name):
         os.makedirs("../models/" + dset_name)
-    path = os.path.join("../models/" + dset_name + '/' + model_name + str(lr) + ".pt")
+    path = os.path.join("../models/" + dset_name + '/' + model_name + str(lr) + "_" + str(epochs) + ".pt")
     if model_name != "VGG" and model_name != "VGG_bn" :
         torch.save(model, path)
     #Saves the accs history graph
     path = os.path.join("../models/" + dset_name + '/')
     plot.train_history(train_accs, val_accs)
-    plt.savefig(path + model_name + "_" + str(lr) + ".png", transparent=True)
+    plt.savefig(path + model_name + "_" + str(lr) + "_" + str(epochs) + ".png", transparent=True)
     # save_data(train_accs, 'train_accs')
     # save_data(val_accs, 'cal_accs')
     # save_data(test_accs, 'test_accs')
