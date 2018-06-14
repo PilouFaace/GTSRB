@@ -60,9 +60,9 @@ def train_history(train_accs, test_accs):
     plt.plot(t, test_accs, 'b')
     plt.title("Network training history")
     plt.legend(["train accuracy", "test accuracy"])
-    plt.ylim(95,100)
-    
-    
+    plt.ylim(0, 100)
+
+
 def train_history1(train_accs, test_accs):
     #rcParams['font.size'] = 12
     t = list(range(len(train_accs)))
