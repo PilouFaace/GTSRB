@@ -160,6 +160,7 @@ if save_model:
     path = os.path.join("../models/" + dset_name + '/')
     plot.train_history(train_accs, val_accs)
     plt.savefig(path + model_name + "_" + str(lr) + "_" + str(epochs) + ".png", transparent=True)
+    plt.clf()
     plot.train_history(train_losses, val_losses)
     plt.savefig(path + model_name + "_" + "losses" + str(lr) + "_" + str(epochs) + ".png", transparent=True)
     # save_data(train_accs, 'train_accs')
