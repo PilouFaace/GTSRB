@@ -141,7 +141,7 @@ class VGG_bn(nn.Module):
             nn.Linear(4096, 4096),
             nn.ReLU(True),
             nn.Dropout(),
-            nn.Linear(4096, 10),
+            nn.Linear(4096, 43),
             nn.Softmax(dim=1)
         )
         # Optimizer and loss function
@@ -172,7 +172,7 @@ class AlexNet_sup(nn.Module):
         )
         self.classifier = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(64 * 8 * 8, 240),
+            nn.Linear(64 * 7 * 7, 240),
             nn.ReLU(inplace=True),
             nn.Dropout(),
             nn.Linear(240, 120),
