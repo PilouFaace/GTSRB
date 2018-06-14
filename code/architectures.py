@@ -172,7 +172,7 @@ class AlexNet_sup(nn.Module):
         )
         self.classifier = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(64 * 7 * 7, 240),
+            nn.Linear(64 * 8 * 8, 240),
             nn.ReLU(inplace=True),
             nn.Dropout(),
             nn.Linear(240, 120),
