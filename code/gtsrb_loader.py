@@ -1,11 +1,5 @@
-"""
-Charge la base de données GTSRB
-
-
-TODO: Enregistrer au format Bytes et diviser par 255 à l'appel (comme MNIST)
-"""
-
-
+# gtsrb_loader.py
+# création et chargement de la base de données
 
 import os
 import wget
@@ -41,6 +35,7 @@ def get_train_folder():
         shutil.move('../data/GTSRB/Final_Training', '../data/')
         shutil.rmtree('../data/GTSRB')
         os.remove('../data/train.zip')
+
 
 def get_test_folder():
     test_url = 'http://benchmark.ini.rub.de/Dataset/GTSRB_Final_Test_Images.zip'
@@ -162,78 +157,6 @@ def mélange(images, labels):
 
 
 # Listes des catégories de paneaux symétrisables.
-auto_miroir_vertical = [11, 12, 13, 15, 17, 18, 22, 26, 30, 35]
-auto_miroir_horizontal = [1, 5, 12, 15, 17]
-auto_miroir_double = [12, 15, 17, 32]
-mutuel_miroir_vert = [[19,20], [33,34], [36,37], [38,39], [20,19], [34,33], [37,36], [39,38]]
-
-
-# Ajoute tous les symétriques à une BDD et mélange les images.
-def symétries(images, labels):
-    labels_num = np.array([np.argmax(i) for i in labels])
-    images_ext = np.empty((0, 40, 40), dtype = images.dtype)
-    labels_ext = np.empty((0, 43), dtype = labels.dtype)
-    for c in range(43):
-        print(c)
-        images_c = images[labels_num == c]
-        images_ext = np.append(images_ext, images_c, axis=0)
-        if c in auto_miroir_horizontal:
-            images_ext = np.append(images_ext, images_c[:, :, ::-1], axis=0)
-        if c in auto_miroir_vertical:
-            images_ext = np.append(images_ext, images_c[:, ::-1, :], axis=0)
-        if c in auto_miroir_double:
-            images_ext = np.append(images_ext, images_c[:, ::-1, ::-1], axis=0)
-        nouv_labels = np.full((len(images_ext) - len(labels_ext), 43), np.eye(43)[c])
-        labels_ext = np.append(labels_ext, nouv_labels, axis=0)
-        if [c, c+1] in mutuel_miroir_vert:
-            images_ext = np.append(images_ext, images_c[:, ::-1, :], axis=0)
-            nouv_labels = np.full((len(images_ext) - len(labels_ext), 43), np.eye(43)[c+1])
-            labels_ext = np.append(labels_ext, nouv_labels, axis=0)
-        if [c, c-1] in mutuel_miroir_vert:
-            images_ext = np.append(images_ext, images_c[:, ::-1, :], axis=0)
-            nouv_labels = np.full((len(images_ext) - len(labels_ext), 43), np.eye(43)[c-1])
-            labels_ext = np.append(labels_ext, nouv_labels, axis=0)
-    mélange(images_ext, labels_ext)
-    return images_ext, labels_ext
-
-
-def create():
-    chemins_images = []
-    for i in range(43):
-        if i < 10:
-            cont = glob.glob(os.path.join('../data/Final_Training/Images/0000{}/*.ppm'.format(i)))
-        else:
-            cont = glob.glob(os.path.join('../data/Final_Training/Images/000{}/*.ppm'.format(i)))
-        random.shuffle(cont)
-        for j in range(2000):
-            chemins_images.append(cont[j])
-    print(len(chemins_images))
-    return chemins_images
-
-
-def train_sym(couleur):  # Couleur : 'rgb', 'grey', 'clahe'
-    if not os.path.exists('../data/' + couleur + '_sym'):
-        print('ajout du chemin')
-        os.makedirs('../data/' + couleur + '_sym')
-    if not os.path.exists('../data/' + couleur + '_sym/train.pt'):
-        chemins_images = glob.glob(os.path.join('../data/Final_Training/Images/*/*.ppm'))
-        images = Parallel(n_jobs=16)(delayed(traite_image)(path, couleur) for path in chemins_images)
-        labels = Parallel(n_jobs=16)(delayed(traite_label)(path) for path in chemins_images)
-        mélange(images, labels)
-        images = torch.Tensor(images)
-        labels = torch.Tensor(labels)
-        if couleur == 'rgb':
-            images = images.permute(0, 3, 1, 2)
-        else:
-            images = images.view(len(images), 1, 40, 40)
-        torch.save((images, labels), '../data/' + couleur + '_sym/train.pt')
-        print('done')
-
-
-
-
-
-
 sym_vert = [11, 12, 13, 15, 17, 18, 22, 26, 30, 35]
 sym_hori = [1, 5, 12, 15, 17]
 sym_diag_droit = [15, 32, 39]
@@ -241,15 +164,7 @@ sym_diag_gauch = [15, 32, 38]
 sym_mut_vert = [[19, 20], [20, 19], [33, 34], [34, 33], [36, 37], [37, 36], [38, 39], [39, 38]]
 
 
-def transpose(tab):
-    tab = transform.resize(tab, (40, 40), mode='wrap')
-    for i in range(40):
-        for j in range(40):
-            if j < i:
-                tab[j][i], tab[i][j] = copy.copy(tab[i][j]), copy.copy(tab[j][i])
-    return tab
-
-
+# Ajoute tous les symétriques à une BDD et mélange les images.
 def ajout_sym():
     for i in range(43):
         print(i)
@@ -291,9 +206,32 @@ def ajout_sym():
                 io.imsave(chemin + '/mut_{}.ppm'.format(j), image_sym)
 
 
-def ajout_distorsion(images, labels):
-    for i in range(43):
-        images_c = images[labels]
+def train_sym(couleur):  # Couleur : 'rgb', 'grey', 'clahe'
+    if not os.path.exists('../data/' + couleur + '_sym'):
+        print('ajout du chemin')
+        os.makedirs('../data/' + couleur + '_sym')
+    if not os.path.exists('../data/' + couleur + '_sym/train.pt'):
+        chemins_images = glob.glob(os.path.join('../data/Final_Training/Images/*/*.ppm'))
+        images = Parallel(n_jobs=16)(delayed(traite_image)(path, couleur) for path in chemins_images)
+        labels = Parallel(n_jobs=16)(delayed(traite_label)(path) for path in chemins_images)
+        mélange(images, labels)
+        images = torch.Tensor(images)
+        labels = torch.Tensor(labels)
+        if couleur == 'rgb':
+            images = images.permute(0, 3, 1, 2)
+        else:
+            images = images.view(len(images), 1, 40, 40)
+        torch.save((images, labels), '../data/' + couleur + '_sym/train.pt')
+        print('done')
+
+
+def transpose(tab):
+    tab = transform.resize(tab, (40, 40), mode='wrap')
+    for i in range(40):
+        for j in range(40):
+            if j < i:
+                tab[j][i], tab[i][j] = copy.copy(tab[i][j]), copy.copy(tab[j][i])
+    return tab
 
 
 # Transforme aléatoirement une image 40X40 par distorsion.
@@ -337,17 +275,36 @@ def resizee():
         print(i)
         if i < 10:
             chemin_images = glob.glob(os.path.join('../data/Final_Training/Images/0000{}/*.ppm'.format(i)))
-            chemin_dossier = '../data/Final_Training/Images/0000{}'.format(i)
 
         else:
             chemin_images = glob.glob(os.path.join('../data/Final_Training/Images/000{}/*.ppm'.format(i)))
-            chemin_dossier = '../data/Final_Training/Images/000{}'.format(i)
         n = len(chemin_images)
         print(n)
         for j in range(n):
             im = io.imread(chemin_images[j])
             im = transform.resize(im, (40, 40), mode='wrap')
             io.imsave(chemin_images[j], im)
+
+
+def create():
+    chemins_images = []
+    for i in range(43):
+        if i < 10:
+            cont = glob.glob(os.path.join('../data/Final_Training/Images/0000{}/*.ppm'.format(i)))
+        else:
+            cont = glob.glob(os.path.join('../data/Final_Training/Images/000{}/*.ppm'.format(i)))
+        random.shuffle(cont)
+        for j in range(2000):
+            chemins_images.append(cont[j])
+    print(len(chemins_images))
+    return chemins_images
+
+
+def create_dist():
+    resizee()
+    normalisation(2000)
+    A = create()
+    print(len(A))
 
 
 def train_dist(couleur, chemin_images):  # Couleur : 'rgb', 'grey', 'clahe'
@@ -365,10 +322,3 @@ def train_dist(couleur, chemin_images):  # Couleur : 'rgb', 'grey', 'clahe'
             images = images.view(len(images), 1, 40, 40)
         torch.save((images, labels), '../data/' + couleur + '_dist/train.pt')
         print('done')
-
-
-def create_dist():
-    resizee()
-    normalisation(2000)
-    A = create()
-    print(len(A))

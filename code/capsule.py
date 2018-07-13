@@ -1,3 +1,5 @@
+# capsules.py
+
 import numpy as np
 
 import torch
@@ -10,15 +12,15 @@ from torchvision import datasets, transforms
 USE_CUDA = True
 
 
-class Mnist:
+class Gtsrb:
     def __init__(self, batch_size):
         dataset_transform = transforms.Compose([
                        transforms.ToTensor(),
                        transforms.Normalize((0.1307,), (0.3081,))
                    ])
 
-        train_dataset = datasets.MNIST('../data', train=True, download=True, transform=dataset_transform)
-        test_dataset = datasets.MNIST('../data', train=False, download=True, transform=dataset_transform)
+        train_dataset = datasets.GTSRB('../data', train=True, download=True, transform=dataset_transform)
+        test_dataset = datasets.GTSRB('../data', train=False, download=True, transform=dataset_transform)
         
         self.train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         self.test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)

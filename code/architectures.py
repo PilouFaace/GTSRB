@@ -1,3 +1,5 @@
+# architectures.py
+
 import torch
 from torch import nn
 
@@ -20,6 +22,43 @@ class AlexNet(nn.Module):
         self.classifier = nn.Sequential(
             nn.Dropout(),
             nn.Linear(64 * 8 * 8, 120),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(120, 43),
+            nn.Softmax(dim=1)
+        )
+        # Optimizer and loss function
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        self.loss_fn = nn.CrossEntropyLoss()
+
+    def forward(self, x):
+        x = self.features(x)
+        x = x.view(x.size(0), -1)  # Flatten
+        x = self.classifier(x)
+        return x
+
+
+class AlexNet_sup(nn.Module):
+    def __init__(self):
+        super(AlexNet_sup, self).__init__()
+        # Training hyperparameters
+        self.lr = 1e-4
+        self.epochs = 100
+        self.batch_size = 64
+        self.features = nn.Sequential(
+            nn.Conv2d(1, 32, kernel_size=5),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2),
+            nn.Conv2d(32, 64, kernel_size=3),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2)
+        )
+        self.classifier = nn.Sequential(
+            nn.Dropout(),
+            nn.Linear(64 * 8 * 8, 240),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(240, 120),
             nn.ReLU(inplace=True),
             nn.Dropout(),
             nn.Linear(120, 43),
@@ -142,43 +181,6 @@ class VGG_bn(nn.Module):
             nn.ReLU(True),
             nn.Dropout(),
             nn.Linear(4096, 43),
-            nn.Softmax(dim=1)
-        )
-        # Optimizer and loss function
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
-        self.loss_fn = nn.CrossEntropyLoss()
-
-    def forward(self, x):
-        x = self.features(x)
-        x = x.view(x.size(0), -1)  # Flatten
-        x = self.classifier(x)
-        return x
-
-
-class AlexNet_sup(nn.Module):
-    def __init__(self):
-        super(AlexNet_sup, self).__init__()
-        # Training hyperparameters
-        self.lr = 1e-4
-        self.epochs = 100
-        self.batch_size = 64
-        self.features = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=5),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2),
-            nn.Conv2d(32, 64, kernel_size=3),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2)
-        )
-        self.classifier = nn.Sequential(
-            nn.Dropout(),
-            nn.Linear(64 * 8 * 8, 240),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(240, 120),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(120, 43),
             nn.Softmax(dim=1)
         )
         # Optimizer and loss function
